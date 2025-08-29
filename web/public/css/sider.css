@@ -1,0 +1,23 @@
+.sider{
+    background: #fff;
+    width: 200px;
+/*   上下10px 左右20 */
+    padding: 10px 20px;
+/*    为了好看点，内边距10*/
+    border-radius: 10px;
+/*    设置圆角*/
+}
+
+.sider ul li{
+    margin: 10px 0;
+ }
+
+/*设置a标签的样式*/
+.sider  ul li a{
+    color:#000;
+    text-decoration:none;  /*    这样就没用底部下划线*/
+}
+/*鼠标经过的样式*/
+.sider ul li a:hover{
+    color:#5a88ff;
+}

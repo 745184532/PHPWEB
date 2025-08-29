@@ -1,0 +1,44 @@
+
+
+.container{
+    width: 400px;
+    height: 300px;
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin: 180px auto 30px auto;
+    border-radius: 20px;
+}
+.container li{
+    margin: 10px 0;
+    padding: 0;
+}
+.container li .title{
+    width: 100px;
+    text-align: right;
+    display: inline-block;
+}
+.container form input{
+    padding: 3px 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+.container form .line{
+    margin-left: 20px;
+}
+.container form input[type=submit]{
+    padding: 10px 20px;
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+    cursor: pointer;
+}
+.container form input[type=submit]:hover{
+    background: #5a5a5a;
+}
+
+.submit_line a{
+    color: #000;
+    font-size: 14px;
+    margin-left: 10px;
+
+}

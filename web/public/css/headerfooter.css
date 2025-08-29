@@ -1,0 +1,47 @@
+body{
+    /*内外边距=0*/
+    padding: 0;
+    margin: 0;
+    background: #f5f5f5;
+}
+
+body ul,body li{
+    list-style: none;
+}
+
+.main{
+    min-height: 100%;
+    height: calc(100vh - 110px);
+    overflow: hidden; /*    超出的隐藏*/
+}
+.header{
+    height: 40px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 1px 1px 6px 4px #eaeaea;
+    margin-bottom: 10px;  /*    这是左侧栏跟头部重碟，需要往下10公分*/
+}
+.header .sitename{
+    float: left;
+    font-weight: bold;
+}
+.header .userinfo{
+    float: right;
+}
+.header .sitename,.header .userinfo{
+    line-height: 40px;  /* 行高*/
+    height: 40px;
+}
+.container-full{
+    width: 1200px;
+    margin: 0 auto;
+}
+.footer{
+    text-align: center;
+    background: #333;
+    color : #999;
+    /*padding: 30px ;*/
+    height: 60px;
+    line-height: 60px;
+/*    垂直剧中*/
+}
