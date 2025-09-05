@@ -43,8 +43,24 @@ class Db{
             $whereArray=[];
             $executeData =[];
             foreach ($condition as $key => $value){
-                $whereArray[] ="$value[0] $value[1] ?";
-                $executeData[] =$value[2];
+
+                if ($value[1]=='between'){
+                    $whereArray[] ="$value[0] $value[1] ? AND ?";
+                    $executeData[] =$value[2][0];
+                    $executeData[] =$value[2][1];
+                }
+                else if ($value[1] == 'in'){
+                    $str = rtrim(str_repeat('?,',count($value[2])),',');
+                    $whereArray[] = "$value[0] $value[1] ($str)";
+                    foreach ($value[2] as $vv){
+                        $executeData[] =$vv;
+                    }
+
+                }
+                else{
+                    $whereArray[] ="$value[0] $value[1] ?";
+                    $executeData[] =$value[2];
+                }
             }
             $where = implode(' AND ',$whereArray);
 
@@ -55,7 +71,20 @@ class Db{
                 self::$executeData =$executeData;
             }
         }
-
+        $this ->buildWhere($where);
+        return $this;
+    }
+    public function whereNull($name){
+        $where = "$name is null";
+        $this ->buildWhere($where);
+        return $this;
+    }
+    public function whereNotNull($name){
+        $where = "$name is not null";
+        $this ->buildWhere($where);
+        return $this;
+    }
+    public function buildWhere($where){
         $oldwhere = self::$where;
         if ($where !== ''){
 
@@ -71,7 +100,6 @@ class Db{
 
             self::$where =$where;
         }
-        return $this;
     }
     public function select(){
         $sql ="select * from ". self::$tablename ." ".self::$where."";
@@ -91,11 +119,11 @@ class Db{
 }
 
 $result = Db::table('users')->where([
-    ["username","<>","123"],
+    ["createtime","between",["2023-11-08 13:00:00","2023-11-08 14:00:00"]],
+    ["id","in",[2,3]]
 
-])->where([
-//    ["id",">=","1"],
-])->select();
+])->whereNull('createtime')
+    ->select();
 
 var_dump($result);
 
