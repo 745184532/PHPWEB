@@ -5,6 +5,8 @@ class Db{
     public static $where='';
     public static $pdo;  //这是一个对象，应该是默认什么都不给
     public static $stmt;
+    //判断是否在where组内()
+    public $isGrouping = false;
     //这个方法是用于连接数据库时调用
     public function __construct(){
         self::connect();
@@ -36,20 +38,21 @@ class Db{
         self::$tablename=$tablename;
         return new self();
     }
-    public  function where(Array $condition){
+    public  function where(Array $condition,$andOrNot='AND'){
         $where ='' ;
         if (!empty($condition)){
+
             //拼接where
             $whereArray=[];
             $executeData =[];
             foreach ($condition as $key => $value){
 
-                if ($value[1]=='between'){
+                if (strtolower($value[1])=='between'){
                     $whereArray[] ="$value[0] $value[1] ? AND ?";
                     $executeData[] =$value[2][0];
                     $executeData[] =$value[2][1];
                 }
-                else if ($value[1] == 'in'){
+                else if (strtolower($value[1]) == 'in'){
                     $str = rtrim(str_repeat('?,',count($value[2])),',');
                     $whereArray[] = "$value[0] $value[1] ($str)";
                     foreach ($value[2] as $vv){
@@ -62,7 +65,18 @@ class Db{
                     $executeData[] =$value[2];
                 }
             }
-            $where = implode(' AND ',$whereArray);
+            if ($andOrNot !== 'NOT' && $andOrNot !== 'ORNOT'){
+                $where = implode(" $andOrNot ",$whereArray);
+            }
+            else {
+                if ($andOrNot =='ORNOT'){
+                    $where = 'NOT (' . implode(" OR ", $whereArray) . ')';
+                }
+                else{
+                    $where = 'NOT (' . implode(" AND ", $whereArray) . ')';
+                }
+            }
+
 
             if (isset(self::$executeData )){
                 self::$executeData =array_merge(self::$executeData,$executeData);
@@ -71,7 +85,9 @@ class Db{
                 self::$executeData =$executeData;
             }
         }
+//        $this ->buildWhere($where,$andOrNot);
         $this ->buildWhere($where);
+
         return $this;
     }
     public function whereNull($name){
@@ -84,22 +100,31 @@ class Db{
         $this ->buildWhere($where);
         return $this;
     }
-    public function buildWhere($where){
+    public function buildWhere($where,$andOrNot='AND'){
         $oldwhere = self::$where;
         if ($where !== ''){
 
             if(strpos($oldwhere,'WHERE')===false){
                 if($oldwhere  !== ''){
-                    $where = 'WHERE '.$oldwhere.' AND '.$where;
+                    $where = 'WHERE '.$oldwhere.' '.$andOrNot.' '.$where;
                 }
                 $where = 'WHERE '.$where;
             }
             else{
-                $where =$oldwhere. ' AND ' .$where;
+                $where =$oldwhere. ' '.$andOrNot.' ' .$where;
             }
 
             self::$where =$where;
         }
+    }
+    public function whereOr(Array $condition){
+       return $this->where($condition,'OR');
+    }
+    public function whereNot(Array $condition){
+        return $this->where($condition,'NOT');
+    }
+    public function whereOrNot(Array $condition){
+        return $this->where($condition,'ORNOT');
     }
     public function select(){
         $sql ="select * from ". self::$tablename ." ".self::$where."";
@@ -119,10 +144,13 @@ class Db{
 }
 
 $result = Db::table('users')->where([
-    ["createtime","between",["2023-11-08 13:00:00","2023-11-08 14:00:00"]],
-    ["id","in",[2,3]]
-
-])->whereNull('createtime')
+    ["id","in",[2,3]],
+    ["id",">",[2,]]
+])
+    ->where([
+        ["createtime","between",["2023-11-08 13:00:00","2023-11-08 14:00:00"]],
+    ])
+//    ->whereNull('createtime')
     ->select();
 
 var_dump($result);
