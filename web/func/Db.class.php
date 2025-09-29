@@ -5,6 +5,10 @@ class Db{
     public static $where='';
     public static $pdo;  //这是一个对象，应该是默认什么都不给
     public static $stmt;
+    public static $order='';
+    public static $limit='';
+    public static $field='*';
+
     //判断是否在where组内()
     public $isGrouping = false;
     //这个方法是用于连接数据库时调用
@@ -126,34 +130,59 @@ class Db{
     public function whereOrNot(Array $condition){
         return $this->where($condition,'ORNOT');
     }
+    //order
+    public function order($orderby){
+        self::$order ="order by".$orderby;
+        return $this;
+    }
+    public function limit($num1,$num2=null){
+        self::$limit =" limit ".(is_null($num2)?$num1:"$num1,num2");
+        return $this;
+    }
+    public function field(string $fields){
+        self::$field = $fields;
+        return $this;
+    }
+    //获取凭借sql的语句
+    public function getLastSql(){
+        return self::$stmt->queryString;
+    }
+    public function count(){
+        $totalArray = $this->field('count(*) as total')->find();
+        return $totalArray;
+    }
     public function select(){
-        $sql ="select * from ". self::$tablename ." ".self::$where."";
-        echo $sql;
-        self::$stmt = self::$pdo -> prepare($sql);
+        try{
+            $sql ="select ". self::$field ." from ". self::$tablename ." ".self::$where." ".self::$order." ".self::$limit;
+//        echo $sql;
+            self::$stmt = self::$pdo -> prepare($sql);
 
-        if(isset(self::$executeData)){
-            self::$stmt -> execute(self::$executeData);
+            if(isset(self::$executeData)){
+                self::$stmt -> execute(self::$executeData);
+            }
+            else{
+                self::$stmt -> execute();
+            }
+            $result = self::$stmt -> fetchAll(PDO::FETCH_ASSOC);
+            self::$stmt ->closeCursor();
+            return $result;
+        }catch(PDOException $e){
+            throw new Exception("查询异常：".$e->getMessage());
         }
-        else{
-            self::$stmt -> execute();
-        }
-        $result = self::$stmt -> fetchAll(PDO::FETCH_ASSOC);
-        self::$stmt ->closeCursor();
-        return $result;
+
+    }
+    public function find(){
+        $result =$this ->limit(1)->select();
+        return isset($result[0])?$result[0]:false;
     }
 }
 
-$result = Db::table('users')->where([
-    ["id","in",[2,3]],
-    ["id",">",[2,]]
-])
-    ->where([
-        ["createtime","between",["2023-11-08 13:00:00","2023-11-08 14:00:00"]],
-    ])
-//    ->whereNull('createtime')
-    ->select();
 
-var_dump($result);
+$quertObject = Db::table('users')->field("id,username,password")->order('id DESC');
+$result =$quertObject->select();
+$sql = $quertObject->getLastSql();
+echo $sql;
+//var_dump($result);
 
 //    Db::table('表格名称')->where([])->select();
 //Db::table('表格名称')->where([])->limit(10)->select();
